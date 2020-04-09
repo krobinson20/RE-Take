@@ -78,15 +78,38 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
+
           if (snapshot.connectionState == ConnectionState.done) {
             // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
+            return Stack(
+              children: <Widget>[
+
+                CameraPreview(_controller),
+                Container(
+                  decoration: BoxDecoration(
+                    image: new DecorationImage(
+                        colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop), //OPACITY
+                        image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                        fit: BoxFit.fitHeight),
+
+                  ),
+                ),
+
+
+
+              ],
+            );
+            //return CameraPreview(_controller);
           } else {
             // Otherwise, display a loading indicator.
             return Center(child: CircularProgressIndicator());
           }
         },
+
       ),
+
+
+
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.camera_alt),
         // Provide an onPressed callback.
@@ -114,6 +137,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => DisplayPictureScreen(imagePath: path),
+
               ),
             );
           } catch (e) {
@@ -132,13 +156,40 @@ class DisplayPictureScreen extends StatelessWidget {
 
   const DisplayPictureScreen({Key key, this.imagePath}) : super(key: key);
 
+
+   // static var ms = (new DateTime.now()).millisecondsSinceEpoch;
+  // static double opac = (ms / 1000) % 10;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Display the Picture')),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
-    );
-  }
+  Widget build(BuildContext context) => new Scaffold(
+
+    appBar: new AppBar(
+      title: new Text('Grey Example'),
+    ),
+    body: Stack(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(.8), BlendMode.dstATop), //OPACITY
+                image: new FileImage(File(imagePath)),
+                fit: BoxFit.fitHeight),
+
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.2), BlendMode.dstATop), //OPACITY
+                image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                fit: BoxFit.fitHeight),
+
+          ),
+        ),
+
+
+
+      ],
+    ),
+  );
 }

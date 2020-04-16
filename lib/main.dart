@@ -132,13 +132,32 @@ class DisplayPictureScreen extends StatelessWidget {
 
   const DisplayPictureScreen({Key key, this.imagePath}) : super(key: key);
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Display the Picture')),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
+        appBar: AppBar(title: Text('Display the Picture')),
+        // The image is stored as a file on the device. Use the `Image.file`
+        // constructor with the given path to display the image.
+        body: Column(
+            children: [
+              Image.file(File(imagePath)),
+              RaisedButton.icon
+                (
+                onPressed: () {
+                  //  delete the photo
+                  File imgFile = File(imagePath);
+
+                  if (imgFile.existsSync()) {
+                    imgFile.delete();
+                  }
+                },
+                icon: Icon(Icons.delete),
+                label: Text('Delete'),
+                color: Colors.deepPurple,
+              ),
+            ]
+        )
     );
   }
 }
+

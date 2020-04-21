@@ -5,6 +5,24 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
+
+int _selectedIndex = 0; //global variable for what icon is selected on the bottom bar
+File StoredImage;
+var selimage = 0;
+const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+const List<Widget> _widgetOptions = <Widget>[
+
+  Text(
+    'Index 1: Take Picture',
+    style: optionStyle,
+  ),
+  Text(
+    'Index 0: Select Immage',
+    style: optionStyle,
+  )
+];
+
 
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
@@ -44,7 +62,7 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   CameraController _controller;
   Future<void> _initializeControllerFuture;
-
+  Future<File> imageFile;
   @override
   void initState() {
     super.initState();
@@ -67,7 +85,52 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     _controller.dispose();
     super.dispose();
   }
+pickImageFromGallery(ImageSource source) async {
 
+  File tempimg = await ImagePicker.pickImage(source: source);
+  selimage = 1;
+
+
+    setState(() {
+      // imageFile = ImagePicker.pickImage(source: source);
+       StoredImage = tempimg;
+    });
+
+
+
+
+
+
+}
+/*
+  Widget showImage(){
+    return FutureBuilder<File>(
+        future: imageFile,
+        builder: (BuildContext context, AsyncSnapshot<File> snapshot){
+          if(snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+            return Image.file(
+              snapshot.data,
+              width: 300,
+              height: 300,
+            );
+          }
+          else if(snapshot.error != null)
+          {
+            return  const Text(
+              'Error Picking Image',
+              textAlign: TextAlign.center,
+            );
+          }
+          else{
+            return const Text(
+              'No Image Selected',
+              textAlign: TextAlign.center,
+            );
+          }
+        }
+    );
+  }
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,55 +138,92 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       // Wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner
       // until the controller has finished initializing.
+
+    bottomNavigationBar: BottomNavigationBar(
+    items: const<BottomNavigationBarItem>[
+    BottomNavigationBarItem(
+    icon: Icon(Icons.photo_library),
+    title: Text('Select a Picture'),
+    ),
+
+    BottomNavigationBarItem(
+    icon:  Icon(Icons.camera),
+    title : Text('Take a Picture'),
+    )
+    ],
+
+    currentIndex: _selectedIndex,
+      onTap: (currentIndex){
+      setState(() {
+        switch(currentIndex){
+          case 0:
+            pickImageFromGallery(ImageSource.gallery);
+
+            break;
+          case 1:
+            getTemporaryDirectory().then((d){
+              var path = join(d.path, '${DateTime.now()}.png');
+              _controller.takePicture(path).then((v){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DisplayPictureScreen(imagePath: path),
+                  ),
+                );
+              });
+            });
+            break;
+
+    }
+      });
+    },
+    ),
+
+
+
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
+
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
-          } else {
-            // Otherwise, display a loading indicator.
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.camera_alt),
-        // Provide an onPressed callback.
-        onPressed: () async {
-          // Take the Picture in a try / catch block. If anything goes wrong,
-          // catch the error.
-          try {
-            // Ensure that the camera is initialized.
-            await _initializeControllerFuture;
+    if (selimage != 0) {
+      if (snapshot.connectionState == ConnectionState.done) {
+        // If the Future is complete, display the preview.
+        return Stack(
+          children: <Widget>[
 
-            // Construct the path where the image should be saved using the
-            // pattern package.
-            final path = join(
-              // Store the picture in the temp directory.
-              // Find the temp directory using the `path_provider` plugin.
-              (await getTemporaryDirectory()).path,
-              '${DateTime.now()}.png',
-            );
+            CameraPreview(_controller),
 
-            // Attempt to take a picture and log where it's been saved.
-            await _controller.takePicture(path);
+            Container(
+              decoration: BoxDecoration(
+                image: new DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop),
+                    //OPACITY
+                    //   image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                    image: new FileImage(StoredImage),
+                    fit: BoxFit.fitHeight),
 
-            // If the picture was taken, display it on a new screen.
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(imagePath: path),
               ),
-            );
-          } catch (e) {
-            // If an error occurs, log the error to the console.
-            print(e);
-          }
-        },
+            ),
+
+          ],
+        );
+        //return CameraPreview(_controller);
+      } else {
+        // Otherwise, display a loading indicator.
+        return Center(child: CircularProgressIndicator());
+      }
+    }else{
+      return  Center(child: Text("Plese Select an Image"));
+    }
+
+          },
+
       ),
+
     );
   }
+
+
 }
 
 // A widget that displays the picture taken by the user.
@@ -132,13 +232,42 @@ class DisplayPictureScreen extends StatelessWidget {
 
   const DisplayPictureScreen({Key key, this.imagePath}) : super(key: key);
 
+
+   // static var ms = (new DateTime.now()).millisecondsSinceEpoch;
+  // static double opac = (ms / 1000) % 10;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Display the Picture')),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
-    );
-  }
+
+  Widget build(BuildContext context) => new Scaffold(
+
+    appBar: new AppBar(
+      title: new Text('Grey Example'),
+    ),
+    body: Stack(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
+                image: new FileImage(File(imagePath)),
+                fit: BoxFit.fitHeight),
+
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop), //OPACITY
+               // image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                image: new FileImage(StoredImage),
+                fit: BoxFit.fitHeight),
+
+          ),
+        ),
+
+
+
+      ],
+    ),
+  );
 }

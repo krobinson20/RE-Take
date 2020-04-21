@@ -86,11 +86,21 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.dispose();
   }
 pickImageFromGallery(ImageSource source) async {
-  StoredImage = await ImagePicker.pickImage(source: source);
+
+  File tempimg = await ImagePicker.pickImage(source: source);
   selimage = 1;
+
+
     setState(() {
-      imageFile = ImagePicker.pickImage(source: source);
+      // imageFile = ImagePicker.pickImage(source: source);
+       StoredImage = tempimg;
     });
+
+
+
+
+
+
 }
 /*
   Widget showImage(){
@@ -148,6 +158,7 @@ pickImageFromGallery(ImageSource source) async {
         switch(currentIndex){
           case 0:
             pickImageFromGallery(ImageSource.gallery);
+
             break;
           case 1:
             getTemporaryDirectory().then((d){
@@ -169,6 +180,7 @@ pickImageFromGallery(ImageSource source) async {
     ),
 
 
+
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
 
@@ -184,8 +196,7 @@ pickImageFromGallery(ImageSource source) async {
             Container(
               decoration: BoxDecoration(
                 image: new DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black
-                        .withOpacity(0.4), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop),
                     //OPACITY
                     //   image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
                     image: new FileImage(StoredImage),
@@ -202,7 +213,7 @@ pickImageFromGallery(ImageSource source) async {
         return Center(child: CircularProgressIndicator());
       }
     }else{
-      return  Center(child: CircularProgressIndicator());
+      return  Center(child: Text("Plese Select an Image"));
     }
 
           },
@@ -237,7 +248,7 @@ class DisplayPictureScreen extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             image: new DecorationImage(
-                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(.8), BlendMode.dstATop), //OPACITY
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
                 image: new FileImage(File(imagePath)),
                 fit: BoxFit.fitHeight),
 
@@ -246,8 +257,9 @@ class DisplayPictureScreen extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             image: new DecorationImage(
-                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.2), BlendMode.dstATop), //OPACITY
-                image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop), //OPACITY
+               // image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
+                image: new FileImage(StoredImage),
                 fit: BoxFit.fitHeight),
 
           ),

@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 int _selectedIndex = 0; //global variable for what icon is selected on the bottom bar
 File StoredImage;
 var selimage = 0;
+double transval = 0.4;
 const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 const List<Widget> _widgetOptions = <Widget>[
 
@@ -96,45 +97,12 @@ pickImageFromGallery(ImageSource source) async {
        StoredImage = tempimg;
     });
 
-
-
-
-
-
 }
-/*
-  Widget showImage(){
-    return FutureBuilder<File>(
-        future: imageFile,
-        builder: (BuildContext context, AsyncSnapshot<File> snapshot){
-          if(snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-            return Image.file(
-              snapshot.data,
-              width: 300,
-              height: 300,
-            );
-          }
-          else if(snapshot.error != null)
-          {
-            return  const Text(
-              'Error Picking Image',
-              textAlign: TextAlign.center,
-            );
-          }
-          else{
-            return const Text(
-              'No Image Selected',
-              textAlign: TextAlign.center,
-            );
-          }
-        }
-    );
-  }
- */
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Take a picture')),
+      appBar: AppBar(title: Text('RE-Take')),
       // Wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner
       // until the controller has finished initializing.
@@ -179,8 +147,6 @@ pickImageFromGallery(ImageSource source) async {
     },
     ),
 
-
-
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
 
@@ -190,21 +156,21 @@ pickImageFromGallery(ImageSource source) async {
         // If the Future is complete, display the preview.
         return Stack(
           children: <Widget>[
-
             CameraPreview(_controller),
-
             Container(
               decoration: BoxDecoration(
                 image: new DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(transval), BlendMode.dstATop),
                     //OPACITY
-                    //   image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
                     image: new FileImage(StoredImage),
                     fit: BoxFit.fitHeight),
-
               ),
             ),
-
+           Slider.adaptive(value: transval,
+                onChanged: (newValue){
+                  setState(() => transval = newValue);
+                },
+            ),
           ],
         );
         //return CameraPreview(_controller);
@@ -215,11 +181,9 @@ pickImageFromGallery(ImageSource source) async {
     }else{
       return  Center(child: Text("Plese Select an Image"));
     }
-
           },
 
       ),
-
     );
   }
 
@@ -241,7 +205,7 @@ class DisplayPictureScreen extends StatelessWidget {
   Widget build(BuildContext context) => new Scaffold(
 
     appBar: new AppBar(
-      title: new Text('Grey Example'),
+      title: new Text('RE-Take'),
     ),
     body: Stack(
       children: <Widget>[
@@ -254,19 +218,7 @@ class DisplayPictureScreen extends StatelessWidget {
 
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            image: new DecorationImage(
-                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop), //OPACITY
-               // image: new NetworkImage('https://i.pinimg.com/originals/94/f1/47/94f147661959b1f3ed0ac9f125abdeb2.jpg'),
-                image: new FileImage(StoredImage),
-                fit: BoxFit.fitHeight),
-
-          ),
-        ),
-
-
-
+        
       ],
     ),
   );

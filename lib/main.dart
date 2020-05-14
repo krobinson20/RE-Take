@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
@@ -168,13 +169,16 @@ pickImageFromGallery(ImageSource source) async {
               ),
             ),
 
-           Slider.adaptive(value: transval,
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: Slider.adaptive(value: transval,
                 onChanged: (newValue){
                   setState(() => transval = newValue);
                 },
+             ),
             ),
-
           ],
+
         );
         //return CameraPreview(_controller);
       } else {
@@ -224,8 +228,8 @@ class DisplayPictureScreen extends StatelessWidget {
               print(success);
   });},
         )
-
       ],
     ),
+    
   );
 }

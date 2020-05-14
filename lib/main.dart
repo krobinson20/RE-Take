@@ -202,12 +202,14 @@ class DisplayPictureScreen extends StatelessWidget {
 
 
   @override
-
-  Widget build(BuildContext context) => new Scaffold(
+Widget build(BuildContext context) => new Scaffold(
 
     appBar: new AppBar(
       title: new Text('RE-Take'),
     ),
+
+
+    
     body: Stack(
       children: <Widget>[
         Container(
@@ -218,18 +220,120 @@ class DisplayPictureScreen extends StatelessWidget {
                 fit: BoxFit.fitHeight),
 
           ),
+         
         ),
-        RaisedButton.icon(
+        Container(
+          child: new Row(
+            children: <Widget>[
+        
+        
+      new RaisedButton.icon(
+          icon: Icon(Icons.autorenew),
+          color: Colors.cyanAccent[100],
+          textColor: Colors.black,
+          label: Text('Compare'),
+          elevation: 55,
+          onPressed: () {
+           Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Compare(imagePath: imagePath),
+                  ),
+                );
+            },
+        ),
+
+     
+      new RaisedButton.icon(
           icon: Icon(Icons.save),
-          color: Colors.deepPurple,
+          color: Colors.cyanAccent[100],
+          textColor: Colors.black,
           label: Text('Save'),
+          elevation: 55,
           onPressed: () {
             GallerySaver.saveImage(imagePath).then((bool success) {
               print(success);
   });},
+        ),
+
+
+     
+
+
+      ],
+          )
+
         )
+         
+        
+       
       ],
     ),
     
   );
+  
+}
+
+
+class Compare extends StatelessWidget{
+  final String imagePath;
+  const Compare({Key key, this.imagePath}) : super(key: key);
+  
+
+  @override
+Widget build(BuildContext context) => new Scaffold(
+
+    appBar: new AppBar(
+      title: new Text('RE-Take'),
+    ),
+
+    
+    body: Stack(
+      children: [
+        new Column(children:[
+          Container(
+            alignment: Alignment.topCenter,
+            height: (MediaQuery.of(context).size.height * 0.5)-50,
+            width: MediaQuery.of(context).size.width,
+            //color: Colors.green,
+            decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
+                image: new FileImage(File(imagePath)),
+                fit: BoxFit.fitHeight),
+
+          ),
+            
+             ),
+            
+          Container(
+            alignment: Alignment.bottomCenter,
+            height: (MediaQuery.of(context).size.height * 0.5)-50,
+            width: MediaQuery.of(context).size.width,
+            //color: Colors.blue,
+            decoration: BoxDecoration(
+            image: new DecorationImage(
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
+                image: new FileImage(StoredImage),
+                fit: BoxFit.fitHeight),
+
+          ),
+             )
+          
+      ],),
+      RaisedButton.icon(
+          icon: Icon(Icons.save),
+          color: Colors.cyanAccent[100],
+          textColor: Colors.black,
+          label: Text('Save'),
+          elevation: 55,
+          onPressed: () {
+            GallerySaver.saveImage(imagePath).then((bool success) {
+              print(success);
+  });},
+        ),
+      ],
+          )
+);
+  
 }

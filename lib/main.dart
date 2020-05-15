@@ -40,7 +40,9 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      theme: ThemeData.dark(),
+   theme: new ThemeData(
+        primarySwatch: Colors.cyan,
+        brightness: Brightness.light,),
       home: TakePictureScreen(
         // Pass the appropriate camera to the TakePictureScreen widget.
         camera: firstCamera,

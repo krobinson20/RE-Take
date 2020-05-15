@@ -13,10 +13,11 @@ import 'package:gallery_saver/gallery_saver.dart';
 int _selectedIndex = 0; //global variable for what icon is selected on the bottom bar
 File StoredImage;
 var selimage = 0;
-double transval = 0.4;
+double transval = 0.4; //value for the transparency
 const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-const List<Widget> _widgetOptions = <Widget>[
 
+//Info for the bottom navigation Bar
+const List<Widget> _widgetOptions = <Widget>[
   Text(
     'Index 1: Take Picture',
     style: optionStyle,
@@ -41,6 +42,7 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: new ThemeData(
         primarySwatch: Colors.cyan,
         brightness: Brightness.light,),
@@ -91,12 +93,15 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     _controller.dispose();
     super.dispose();
   }
+  //Function that allows the user to select an image from their gallery
   pickImageFromGallery(ImageSource source) async {
 
+    //holder variable for the selected image
     File tempimg = await ImagePicker.pickImage(source: source);
+    //boolean for if the user has picked an image or not
     selimage = 1;
 
-
+ // set the state of StoredImage to the temporary variable//this is because the StoredImage variable cant just be passed the selected image
     setState(() {
       // imageFile = ImagePicker.pickImage(source: source);
       StoredImage = tempimg;
@@ -130,10 +135,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           setState(() {
             switch(currentIndex){
               case 0:
+                //case 0 if the user taps select and image
+                //function call for selecting the image from the gallery
                 pickImageFromGallery(ImageSource.gallery);
 
                 break;
               case 1:
+                //case 1 for if the user taps take a picture
                 getTemporaryDirectory().then((d){
                   var path = join(d.path, '${DateTime.now()}.png');
                   _controller.takePicture(path).then((v){
@@ -146,7 +154,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                   });
                 });
                 break;
-
             }
           });
         },
@@ -156,6 +163,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         future: _initializeControllerFuture,
 
         builder: (context, snapshot) {
+          //if there is a selected image then show the transparent preview of the image
           if (selimage != 0) {
             if (snapshot.connectionState == ConnectionState.done) {
               // If the Future is complete, display the preview.
@@ -165,13 +173,14 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                   Container(
                     decoration: BoxDecoration(
                       image: new DecorationImage(
+                        //overlaid image with variable transparency value
                           colorFilter: new ColorFilter.mode(Colors.black.withOpacity(transval), BlendMode.dstATop),
-                          //OPACITY
                           image: new FileImage(StoredImage),
                           fit: BoxFit.fitHeight),
                     ),
                   ),
 
+                  //slider for changing the transparency value
                   Container(
                     alignment: Alignment.bottomCenter,
                     child: Slider.adaptive(value: transval,
@@ -188,7 +197,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               // Otherwise, display a loading indicator.
               return Center(child: CircularProgressIndicator());
             }
-          }else{
+          }
+          //if the user has not selected an image then tell them to select one
+          else{
             return  Center(child: Text("Plese Select an Image"));
           }
         },
@@ -200,7 +211,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
-  final String imagePath;
+  final String imagePath; // variable for the path of the image that was just taken
   const DisplayPictureScreen({Key key, this.imagePath}) : super(key: key);
 
 
@@ -217,7 +228,7 @@ class DisplayPictureScreen extends StatelessWidget {
           decoration: BoxDecoration(
             image: new DecorationImage(
                 colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
-                image: new FileImage(File(imagePath)),
+                image: new FileImage(File(imagePath)), //the image that was taken
                 fit: BoxFit.fitHeight),
 
           ),
@@ -229,7 +240,7 @@ class DisplayPictureScreen extends StatelessWidget {
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-
+                // button for comparing the before and after images
                 new RaisedButton.icon(
                   icon: Icon(Icons.autorenew),
                   color: Colors.cyanAccent[100],
@@ -246,7 +257,7 @@ class DisplayPictureScreen extends StatelessWidget {
                   },
                 ),
 
-
+                // button for saving the newly taken picture
                 new RaisedButton.icon(
                   icon: Icon(Icons.save),
                   color: Colors.cyanAccent[100],
@@ -269,7 +280,7 @@ class DisplayPictureScreen extends StatelessWidget {
 
 }
 
-
+// if the user taps compare it shows both the before and after images
 class Compare extends StatelessWidget{
   final String imagePath;
   const Compare({Key key, this.imagePath}) : super(key: key);
@@ -298,9 +309,7 @@ class Compare extends StatelessWidget{
                     fit: BoxFit.fitHeight),
 
               ),
-
             ),
-
             Container(
               alignment: Alignment.bottomCenter,
               height: (MediaQuery.of(context).size.height * 0.5)-50,
@@ -314,8 +323,9 @@ class Compare extends StatelessWidget{
 
               ),
             )
-
-          ],),
+          ],
+          ),
+          //button for saving the image
           RaisedButton.icon(
             icon: Icon(Icons.save),
             color: Colors.cyanAccent[100],
@@ -327,8 +337,8 @@ class Compare extends StatelessWidget{
                 print(success);
               });},
           ),
+
         ],
       )
   );
-
 }

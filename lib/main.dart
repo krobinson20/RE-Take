@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -40,7 +41,9 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      theme: ThemeData.dark(),
+      theme: new ThemeData(
+        primarySwatch: Colors.cyan,
+        brightness: Brightness.light,),
       home: TakePictureScreen(
         // Pass the appropriate camera to the TakePictureScreen widget.
         camera: firstCamera,
@@ -88,18 +91,18 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     _controller.dispose();
     super.dispose();
   }
-pickImageFromGallery(ImageSource source) async {
+  pickImageFromGallery(ImageSource source) async {
 
-  File tempimg = await ImagePicker.pickImage(source: source);
-  selimage = 1;
+    File tempimg = await ImagePicker.pickImage(source: source);
+    selimage = 1;
 
 
     setState(() {
       // imageFile = ImagePicker.pickImage(source: source);
-       StoredImage = tempimg;
+      StoredImage = tempimg;
     });
 
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,86 +112,86 @@ pickImageFromGallery(ImageSource source) async {
       // camera preview. Use a FutureBuilder to display a loading spinner
       // until the controller has finished initializing.
 
-    bottomNavigationBar: BottomNavigationBar(
-    items: const<BottomNavigationBarItem>[
-    BottomNavigationBarItem(
-    icon: Icon(Icons.photo_library),
-    title: Text('Select a Picture'),
-    ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const<BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo_library),
+            title: Text('Select a Picture'),
+          ),
 
-    BottomNavigationBarItem(
-    icon:  Icon(Icons.camera),
-    title : Text('Take a Picture'),
-    )
-    ],
+          BottomNavigationBarItem(
+            icon:  Icon(Icons.camera),
+            title : Text('Take a Picture'),
+          )
+        ],
 
-    currentIndex: _selectedIndex,
-      onTap: (currentIndex){
-      setState(() {
-        switch(currentIndex){
-          case 0:
-            pickImageFromGallery(ImageSource.gallery);
+        currentIndex: _selectedIndex,
+        onTap: (currentIndex){
+          setState(() {
+            switch(currentIndex){
+              case 0:
+                pickImageFromGallery(ImageSource.gallery);
 
-            break;
-          case 1:
-            getTemporaryDirectory().then((d){
-              var path = join(d.path, '${DateTime.now()}.png');
-              _controller.takePicture(path).then((v){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DisplayPictureScreen(imagePath: path),
-                  ),
-                );
-              });
-            });
-            break;
+                break;
+              case 1:
+                getTemporaryDirectory().then((d){
+                  var path = join(d.path, '${DateTime.now()}.png');
+                  _controller.takePicture(path).then((v){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DisplayPictureScreen(imagePath: path),
+                      ),
+                    );
+                  });
+                });
+                break;
 
-    }
-      });
-    },
-    ),
+            }
+          });
+        },
+      ),
 
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
 
         builder: (context, snapshot) {
-    if (selimage != 0) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        // If the Future is complete, display the preview.
-        return Stack(
-          children: <Widget>[
-            CameraPreview(_controller),
-            Container(
-              decoration: BoxDecoration(
-                image: new DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(transval), BlendMode.dstATop),
-                    //OPACITY
-                    image: new FileImage(StoredImage),
-                    fit: BoxFit.fitHeight),
-              ),
-            ),
+          if (selimage != 0) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              // If the Future is complete, display the preview.
+              return Stack(
+                children: <Widget>[
+                  CameraPreview(_controller),
+                  Container(
+                    decoration: BoxDecoration(
+                      image: new DecorationImage(
+                          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(transval), BlendMode.dstATop),
+                          //OPACITY
+                          image: new FileImage(StoredImage),
+                          fit: BoxFit.fitHeight),
+                    ),
+                  ),
 
-          Container(
-            alignment: Alignment.bottomCenter,
-            child: Slider.adaptive(value: transval,
-                onChanged: (newValue){
-                  setState(() => transval = newValue);
-                },
-             ),
-            ),
-          ],
+                  Container(
+                    alignment: Alignment.bottomCenter,
+                    child: Slider.adaptive(value: transval,
+                      onChanged: (newValue){
+                        setState(() => transval = newValue);
+                      },
+                    ),
+                  ),
+                ],
 
-        );
-        //return CameraPreview(_controller);
-      } else {
-        // Otherwise, display a loading indicator.
-        return Center(child: CircularProgressIndicator());
-      }
-    }else{
-      return  Center(child: Text("Plese Select an Image"));
-    }
-          },
+              );
+              //return CameraPreview(_controller);
+            } else {
+              // Otherwise, display a loading indicator.
+              return Center(child: CircularProgressIndicator());
+            }
+          }else{
+            return  Center(child: Text("Plese Select an Image"));
+          }
+        },
 
       ),
     );
@@ -202,12 +205,12 @@ class DisplayPictureScreen extends StatelessWidget {
 
 
   @override
-
   Widget build(BuildContext context) => new Scaffold(
 
     appBar: new AppBar(
       title: new Text('RE-Take'),
     ),
+
     body: Stack(
       children: <Widget>[
         Container(
@@ -218,18 +221,114 @@ class DisplayPictureScreen extends StatelessWidget {
                 fit: BoxFit.fitHeight),
 
           ),
+
         ),
-        RaisedButton.icon(
-          icon: Icon(Icons.save),
-          color: Colors.deepPurple,
-          label: Text('Save'),
-          onPressed: () {
-            GallerySaver.saveImage(imagePath).then((bool success) {
-              print(success);
-  });},
+        Container(
+          child: Align(
+            alignment: FractionalOffset.bottomCenter,
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+
+                new RaisedButton.icon(
+                  icon: Icon(Icons.autorenew),
+                  color: Colors.cyanAccent[100],
+                  textColor: Colors.black,
+                  label: Text('Compare'),
+                  elevation: 55,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Compare(imagePath: imagePath),
+                      ),
+                    );
+                  },
+                ),
+
+
+                new RaisedButton.icon(
+                  icon: Icon(Icons.save),
+                  color: Colors.cyanAccent[100],
+                  textColor: Colors.black,
+                  label: Text('Save'),
+                  elevation: 55,
+                  onPressed: () {
+                    GallerySaver.saveImage(imagePath).then((bool success) {
+                      print(success);
+                    });},
+                ),
+              ],
+            )
+          )
         )
       ],
     ),
-    
+
   );
+
+}
+
+
+class Compare extends StatelessWidget{
+  final String imagePath;
+  const Compare({Key key, this.imagePath}) : super(key: key);
+
+
+  @override
+  Widget build(BuildContext context) => new Scaffold(
+
+      appBar: new AppBar(
+        title: new Text('RE-Take'),
+      ),
+
+
+      body: Stack(
+        children: [
+          new Column(children:[
+            Container(
+              alignment: Alignment.topCenter,
+              height: (MediaQuery.of(context).size.height * 0.5)-50,
+              width: MediaQuery.of(context).size.width,
+              //color: Colors.green,
+              decoration: BoxDecoration(
+                image: new DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
+                    image: new FileImage(File(imagePath)),
+                    fit: BoxFit.fitHeight),
+
+              ),
+
+            ),
+
+            Container(
+              alignment: Alignment.bottomCenter,
+              height: (MediaQuery.of(context).size.height * 0.5)-50,
+              width: MediaQuery.of(context).size.width,
+              //color: Colors.blue,
+              decoration: BoxDecoration(
+                image: new DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop), //OPACITY
+                    image: new FileImage(StoredImage),
+                    fit: BoxFit.fitHeight),
+
+              ),
+            )
+
+          ],),
+          RaisedButton.icon(
+            icon: Icon(Icons.save),
+            color: Colors.cyanAccent[100],
+            textColor: Colors.black,
+            label: Text('Save'),
+            elevation: 55,
+            onPressed: () {
+              GallerySaver.saveImage(imagePath).then((bool success) {
+                print(success);
+              });},
+          ),
+        ],
+      )
+  );
+
 }
